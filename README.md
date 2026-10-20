@@ -1,248 +1,292 @@
-# Smart Indian Sign Language (ISL) Communication Assistant using CNN-BiLSTM with Attention
+# Smart Indian Sign Language (ISL) Communication Assistant
 
-🎓 **Final-Year College Engineering Project**  
-AI-Powered Two-Way Communication System between Indian Sign Language (ISL) Users and Hearing Individuals.
+An AI-assisted web application designed to support communication between Indian Sign Language (ISL) users and hearing individuals through sign recognition, English-to-ISL conversion, interactive learning, and emergency assistance.
 
----
+## About the Project
 
-## 1. Project Overview
+Communication between people who use Indian Sign Language and those unfamiliar with it can be challenging. The Smart ISL Communication Assistant aims to reduce this barrier using Artificial Intelligence, Computer Vision, Deep Learning, and Natural Language Processing.
 
-Indian Sign Language (ISL) is the primary visual language for millions of Deaf and hard-of-hearing citizens across India. Unlike spoken Indian languages, ISL has distinct grammar, Subject-Object-Verb (SOV) sentence structuring, two-handed finger-spelling, and rich spatial hand-pose markers.
+The system is designed to support two-way communication, allowing ISL gestures to be translated into English and English text or speech to be converted into visual ISL representations. It also includes an ISL learning module and a proposed emergency assistance feature.
 
-This project delivers a **bidirectional AI-assisted communication bridge**:
-- **Forward Pipeline (Signer → Hearing User)**: Real-time video input $\rightarrow$ MediaPipe coordinate extraction $\rightarrow$ **CNN-BiLSTM with Temporal Attention** gesture classification $\rightarrow$ Transformer-based NLP grammar correction $\rightarrow$ Synthesized spoken English audio.
-- **Reverse Pipeline (Hearing User → Signer)**: Spoken voice or typed English $\rightarrow$ Speech-to-Text transcription $\rightarrow$ ISL linguistic tokenization $\rightarrow$ Visual ISL gesture cues.
+## Key Features
 
-> [!IMPORTANT]
-> **Model Integrity Rule**: The core recognition architecture strictly utilizes **CNN-BiLSTM with Attention**. Generic cloud AI (e.g. ChatGPT / Gemini) is **not** used to replace the custom neural network. In this initial stage, no fake predictions are produced.
+### 1. ISL Recognition Module
 
----
+* Captures live video through a webcam.
+* Uses MediaPipe Holistic to extract hand, pose, and facial landmarks.
+* Prepares landmark sequences for gesture recognition.
+* Uses the proposed CNN-BiLSTM with Attention architecture for continuous sign recognition.
+* Converts recognized ISL glosses into English sentences using NLP.
+* Supports spoken output through Text-to-Speech (TTS).
+* Checks recognized signs for predefined emergency gestures.
 
-## 2. System Architecture
+### 2. English/Speech-to-ISL Module
 
-```
-                          ┌──────────────────────────────────────────────┐
-                          │         React Frontend (Vite + CSS)          │
-                          │   - Dashboard / Live Status Badges           │
-                          │   - ISL → English (Webcam Capture)           │
-                          │   - English/Speech → ISL (Mic + Text)        │
-                          │   - ISL Learning & Curriculum Hub            │
-                          │   - About & Architecture Reference           │
-                          └──────────────────────┬───────────────────────┘
-                                                 │ HTTP / REST API
-                                                 ▼
-                          ┌──────────────────────────────────────────────┐
-                          │            FastAPI Backend Engine            │
-                          │   - Modular Router Aggregator                │
-                          │   - Preprocessing Pipeline Manager           │
-                          │   - CNN-BiLSTM Model Integration Layer       │
-                          │   - Speech & NLP Service Interfaces          │
-                          └──────────────────────┬───────────────────────┘
-                                                 │
-      ┌──────────────────────┬───────────────────┼───────────────────┬──────────────────────┐
-      │                      │                   │                   │                      │
-      ▼                      ▼                   ▼                   ▼                      ▼
-┌──────────────┐      ┌──────────────┐    ┌──────────────┐    ┌──────────────┐      ┌──────────────┐
-│ Preprocessing│      │   ML Model   │    │  NLP Engine  │    │Speech Service│      │   Database   │
-│ - MediaPipe  │      │ - CNN-BiLSTM │    │ - Transformer│    │ - Whisper STT│      │ - In-Memory  │
-│   Holistic   │      │   + Attention│    │   Gloss-to-  │    │ - Web Speech │      │ - SQLite /   │
-│ - Normalizer │      │ - Class Head │    │   Sentence   │    │   TTS API    │      │   Firebase   │
-│ - 30-Frame   │      │ - Weights in │    │ - ISL Parser │    │              │      │              │
-│   Buffer     │      │   /weights/  │    │              │    │              │      │              │
-└──────────────┘      └──────────────┘    └──────────────┘    └──────────────┘      └──────────────┘
-```
+* Accepts English text or speech as input.
+* Uses Whisper Automatic Speech Recognition (ASR) for speech-to-text conversion when configured.
+* Processes English text into an ISL representation.
+* Generates a gloss sequence using the available mapping resources.
+* Displays visual sign output using the sign sequence renderer.
 
----
+### 3. Learning Support Module
 
-## 3. Folder Structure
+* Provides lessons for learning Indian Sign Language.
+* Captures learners' gestures through a webcam.
+* Extracts landmarks using MediaPipe.
+* Compares learner gestures with reference sign sequences using Dynamic Time Warping (DTW).
+* Generates practice feedback based on gesture similarity.
 
-```
-c:\isl assistant\
-├── frontend/                     # Modern React + Vite Frontend
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src/
-│       ├── main.jsx
-│       ├── App.jsx
-│       ├── index.css             # Unified modern dark design system
-│       ├── components/
-│       │   ├── Navbar.jsx        # Navigation bar & API status indicator
-│       │   ├── Footer.jsx        # System architecture footer
-│       │   ├── StatusBadge.jsx   # Status indicator pill
-│       │   ├── WebcamCapture.jsx # Webcam streaming & canvas overlay
-│       │   └── Card.jsx          # Glassmorphic card container
-│       ├── pages/
-│       │   ├── Dashboard.jsx     # System overview & module cards
-│       │   ├── ISLToEnglish.jsx  # Live webcam gesture recognition interface
-│       │   ├── EnglishToISL.jsx  # Speech & text to ISL conversion
-│       │   ├── ISLLearning.jsx   # Curriculum & interactive gesture mirror
-│       │   └── AboutHelp.jsx     # Architecture guide & documentation
-│       ├── services/
-│       │   └── api.js            # REST API client
-│       └── utils/
-│           └── speech.js         # Web Speech API helpers
-├── backend/                      # FastAPI Backend Server
-│   ├── main.py                   # App entry point, CORS, and /api/health
-│   ├── requirements.txt
-│   ├── .env.example
+### 4. Emergency Assistance
+
+* Checks recognized glosses for predefined emergency signs.
+* Is designed to obtain the user's location when permission and location services are available.
+* Supports an emergency alert workflow using an SMS gateway.
+* Is intended to provide alert delivery confirmation when supported by the configured service.
+
+Actual emergency detection, GPS access, SMS delivery, and confirmation must be implemented and tested before being considered operational.
+
+## System Architecture
+
+The system consists of three main modules connected through a shared application architecture.
+
+### Module 1: ISL Recognition
+
+**Workflow:**
+
+Webcam Video Capture → MediaPipe Holistic → Landmark Extraction and Normalization → CNN Feature Extraction → BiLSTM + Attention + CTC Decoder → ISL Gloss Sequence
+
+The recognized gloss sequence is checked for predefined emergency gestures.
+
+* **If an emergency gesture is detected:** The system proceeds to the emergency assistance workflow.
+* **If no emergency gesture is detected:** The gloss sequence is processed into an English sentence using Transformer-based NLP, followed by optional Text-to-Speech output.
+
+**Emergency workflow:**
+
+Emergency Gesture Detection → GPS and SMS Gateway → Location Sharing → Alert and Confirmation to Contact
+
+### Module 2: English/Speech-to-ISL
+
+**Workflow:**
+
+Speech/Text Input → Whisper ASR (Speech-to-Text, when speech is provided) → Text Processing → Gloss Sequence Generator → Sign Sequence Renderer → ISL Video Output
+
+This module is intended to convert English input into a visual ISL representation using available gloss mappings and sign resources.
+
+### Module 3: Learning Support
+
+**Workflow:**
+
+Learner's Practice Gesture → MediaPipe Landmark Extraction → Reference Sign Database → DTW Similarity Scoring → Feedback Generator
+
+This module compares a learner's gesture with stored reference sequences and provides feedback based on the comparison.
+
+### Shared Resources
+
+The following resources support the proposed architecture:
+
+* **Gloss Mapping Engine:** Maps glosses to English meanings using available dictionary and grammar rules.
+* **Reference Sign Database:** Stores reference sign sequences for gesture comparison and learning.
+* **Speech Processing:** Supports speech-to-text and text-to-speech operations.
+* **Sign Sequence Renderer:** Displays the visual representation of ISL signs.
+
+The architecture describes the intended design. The availability and completeness of each component depend on the actual implementation, trained models, datasets, and configured services.
+
+## Technology Stack
+
+| Component                   | Technology                                    |
+| --------------------------- | --------------------------------------------- |
+| Frontend                    | React, Vite, JavaScript, CSS                  |
+| Backend                     | Python, FastAPI, Uvicorn                      |
+| Computer Vision             | MediaPipe Holistic                            |
+| Deep Learning               | CNN-BiLSTM with Attention                     |
+| Sequence Decoding           | CTC Decoder                                   |
+| Natural Language Processing | Transformer-based gloss-to-English processing |
+| Speech Recognition          | Whisper ASR                                   |
+| Speech Output               | Text-to-Speech (TTS)                          |
+| Gesture Comparison          | Dynamic Time Warping (DTW)                    |
+| API Communication           | HTTP/REST                                     |
+
+The table describes the technologies planned for the system; not every component is necessarily integrated yet.
+
+## Project Structure
+
+```text
+isl assistant/
+├── backend/
 │   ├── api/
-│   │   ├── __init__.py
-│   │   ├── routes.py             # Router aggregator
-│   │   ├── isl_routes.py         # /api/isl/recognize & /api/isl/model-info
-│   │   ├── nlp_routes.py         # /api/nlp/gloss-to-english & /api/english/to-isl
-│   │   ├── speech_routes.py      # /api/speech/transcribe & /api/tts
-│   │   └── learning_routes.py    # /api/learning
-│   └── schemas/
-│       ├── __init__.py
-│       └── models.py             # Pydantic request/response models
-├── ml_model/                     # CNN-BiLSTM + Attention Integration
-│   ├── __init__.py
-│   ├── model_interface.py        # Abstract base class interface
-│   ├── cnn_bilstm_attention.py   # Model architecture definition
-│   ├── model_loader.py           # Model loader looking in weights/
-│   └── weights/                  # Directory for trained weight files
-│       └── README.md
-├── preprocessing/                # Computer Vision & Landmark Extraction
-│   ├── __init__.py
-│   ├── mediapipe_holistic.py     # MediaPipe Holistic wrapper
-│   ├── landmark_extractor.py     # 126-D hand & pose landmark parser
-│   ├── normalizer.py             # Origin translation & scale normalization
-│   └── sequence_builder.py       # Sliding window sequence buffer (30 frames)
-├── nlp/                          # Natural Language Processing
-│   ├── __init__.py
-│   ├── nlp_service.py            # NLP base interface
-│   └── gloss_translator.py       # ISL Gloss <-> English translation
-├── speech/                       # Speech Processing
-│   ├── __init__.py
-│   ├── whisper_service.py        # Whisper STT service abstraction
-│   └── tts_service.py            # TTS service wrapper
-├── database/                     # Modular Storage Layer
-│   ├── __init__.py
-│   └── db_interface.py           # In-memory / Firebase abstraction
-├── config/                       # Centralized App Configuration
-│   ├── __init__.py
-│   └── settings.py
-├── docs/                         # Technical Specs & Reference
-│   ├── architecture.md
-│   ├── pipeline_design.md
-│   └── model_specifications.md
+│   ├── schemas/
+│   └── main.py
+├── config/
+├── database/
+├── docs/
+├── frontend/
+│   ├── public/
+│   └── src/
+│       ├── assets/
+│       ├── components/
+│       ├── pages/
+│       ├── services/
+│       └── utils/
+├── ml_model/
+├── nlp/
+├── preprocessing/
+├── speech/
 ├── .env.example
 ├── .gitignore
 ├── requirements.txt
 └── README.md
 ```
 
----
+This is a summary of the project structure. Individual files may vary depending on the current implementation.
 
-## 4. Technology Stack
+## Requirements
 
-- **Frontend**: React 18, Vite, Vanilla CSS Design System (no Tailwind dependencies), Lucide Icons, Web Speech API.
-- **Backend**: Python 3.12, FastAPI, Uvicorn, Pydantic v2.
-- **Computer Vision**: OpenCV, MediaPipe Holistic.
-- **Deep Learning**: CNN-BiLSTM with Temporal Attention (TensorFlow / PyTorch compatible interface).
-- **Speech**: OpenAI Whisper abstraction + Web Speech API (STT & TTS).
-- **NLP**: Modular Transformer Gloss-to-Sentence Interface.
+* Python 3.11 is recommended for the existing machine-learning environment.
+* Node.js and npm.
+* A modern web browser.
+* A webcam for gesture capture and practice.
+* Python dependencies listed in `requirements.txt`.
+* Frontend dependencies listed in `frontend/package.json`.
 
----
+Additional models, datasets, or external services may be required for individual features.
 
-## 5. Installation Instructions
+## Installation and Setup
 
-### Prerequisites
-- Python 3.10+ (Python 3.12 tested)
-- Node.js v18+ (Node.js v22 tested) and npm
+### 1. Clone the Repository
 
-### Clone / Navigate to Directory
 ```bash
-cd "c:\isl assistant"
+git clone YOUR_GITHUB_REPOSITORY_URL
 ```
 
----
+Navigate to the project directory:
 
-## 6. Backend Setup
+```powershell
+cd "isl assistant"
+```
+ 
 
-1. Install Python dependencies:
-```bash
+### 2. Set Up the Python Environment
+
+Create a virtual environment if one does not already exist:
+
+```powershell
+python -m venv .venv
+```
+
+Activate it in Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Install the backend dependencies:
+
+```powershell
 pip install -r requirements.txt
 ```
 
-2. Create `.env` file (optional, defaults are pre-configured):
-```bash
-copy .env.example .env
+### 3. Start the Backend
+
+Run this command from the project root:
+
+```powershell
+python -m uvicorn backend.main:app --reload
 ```
 
----
+The backend should be available at:
 
-## 7. Frontend Setup
+* **Backend:** `http://127.0.0.1:8000/`
+* **API documentation:** `http://127.0.0.1:8000/docs`
 
-1. Navigate to the `frontend/` directory and install npm packages:
-```bash
-cd frontend
+If the application provides a health endpoint, it can be used to check backend availability.
+
+### 4. Start the Frontend
+
+Open a second terminal and navigate to the frontend directory:
+
+```powershell
+cd "C:\isl assistant\frontend"
+```
+
+Install the frontend dependencies:
+
+```powershell
 npm install
 ```
 
----
+Start the development server:
 
-## 8. How to Run the Application
-
-### Option A: Run Backend Server
-In the root directory (`c:\isl assistant`):
-```bash
-python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
-```
-API docs will be available at `http://127.0.0.1:8000/docs`.
-
-### Option B: Run Frontend Development Server
-In a second terminal in `c:\isl assistant\frontend`:
-```bash
+```powershell
 npm run dev
 ```
-Open your browser at `http://localhost:5173`.
 
----
+Open the local URL displayed by Vite. The default development address is:
 
-## 9. API Endpoints
+`http://localhost:5173/`
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/health` | Diagnostics & module readiness status |
-| `GET` | `/api/isl/model-info` | CNN-BiLSTM with Attention architecture metadata |
-| `POST` | `/api/isl/recognize` | Process 30-frame landmark sequence |
-| `POST` | `/api/nlp/gloss-to-english` | Translate ISL Gloss words into English sentence |
-| `POST` | `/api/english/to-isl` | Parse English text into ISL token structures |
-| `POST` | `/api/speech/transcribe` | Transcribe audio stream / file |
-| `POST` | `/api/tts` | Text-to-Speech synthesis metadata |
-| `GET` | `/api/learning` | ISL learning curriculum catalog |
+Keep both the frontend and backend servers running while testing features that depend on the API.
 
----
+### 5. Camera Access
 
-## 10. Where to Place the Trained CNN-BiLSTM + Attention Model
+Allow camera access when prompted by the browser. If the camera does not work, check browser permissions and ensure that another application is not exclusively using the webcam.
 
-Place your trained model files into:
-```
-ml_model/weights/
-```
+## Model and Dataset Requirements
 
-### Supported Formats
-- **TensorFlow / Keras**: `isl_cnn_bilstm_attention.keras` or `isl_cnn_bilstm_attention.h5`
-- **PyTorch**: `isl_cnn_bilstm_attention.pth` or `isl_cnn_bilstm_attention.pt`
-- **Class Labels**: `label_classes.json` (Array of gloss labels corresponding to output softmax indices)
+The proposed CNN-BiLSTM with Attention recognition pipeline requires a trained model, compatible weights, and the correct class labels.
 
-The backend singleton [`ml_model/model_loader.py`](file:///c:/isl%20assistant/ml_model/model_loader.py) automatically detects model files in this folder upon startup.
+The model's input shape must match the landmark preprocessing pipeline used during training. The training configuration must also match the sequence length, feature dimensions, and decoding method.
 
----
+A suitable labelled ISL dataset is required for training and evaluation. Recognition results should be generated through actual model inference rather than hardcoded or simulated predictions.
 
-## 11. Current Limitations (Stage 1 Status)
+## Current Implementation Status
 
-1. **Model Weights**: Deep learning weights for the CNN-BiLSTM + Attention classifier do not exist yet. The system returns honest status responses (`model_not_loaded`) with zero fake predictions.
-2. **Transformer NLP Model**: Fine-tuned sequence-to-sequence weights (e.g. T5 ISL model) are not yet integrated; raw token pass-through is utilized.
-3. **ISL Visual Avatar**: Reverse pipeline generates structured ISL token tags; 3D animated mesh rendering is scheduled for future work.
+The project contains a React frontend, a FastAPI backend, and a webcam-based landmark-processing workflow.
 
----
+The following components require verification against the current code and available resources:
 
-## 12. Future Development Stages
+* Integration of trained CNN-BiLSTM model weights.
+* End-to-end continuous sign recognition.
+* Conversion of recognized glosses into grammatically correct English sentences.
+* Integration of the Transformer-based NLP component.
+* Complete English/speech-to-ISL visual generation.
+* Reference-based gesture comparison and learning feedback.
+* Emergency sign detection and actual GPS/SMS alert delivery.
 
-- **Stage 2**: Collect MediaPipe landmark dataset across 50+ standard ISL vocabulary gestures.
-- **Stage 3**: Train CNN-BiLSTM with Temporal Attention on GPU and export `.keras` / `.pth` weights.
-- **Stage 4**: Fine-tune a lightweight sequence-to-sequence Transformer for ISL Gloss $\rightarrow$ English grammatical restructuring.
-- **Stage 5**: Integrate Three.js / WebGL 3D avatar for visual gesture animation in the reverse pipeline.
+The availability of the frontend, camera, or backend API does not by itself confirm that all recognition and translation features are working.
+
+
+## Future Enhancements
+
+* Train and evaluate the CNN-BiLSTM with Attention model using a suitable ISL dataset.
+* Improve continuous sign recognition and English sentence generation.
+* Expand the supported ISL vocabulary.
+* Evaluate signer-independent recognition.
+* Improve English-to-ISL visual generation.
+* Expand interactive lessons and gesture feedback.
+* Complete and test emergency assistance.
+* Improve accessibility, responsiveness, and performance.
+
+## Academic Project Details
+
+**Project Title:** Smart Indian Sign Language (ISL) Communication Assistant Using CNN-BiLSTM with Attention
+
+**Department:** Computer Science and Engineering
+
+**Institution:** Vidya Academy of Science and Technology
+
+**Project Guide:** Ms. Umasree A. K.
+
+### Project Team
+
+| Name             | Register Number |
+| ---------------- | --------------- |
+| Aleena K. Davis  | VAS23CS034      |
+| Andriya C. J.    | VAS23CS049      |
+| Anjana O. S.     | VAS23CS051      |
+| Annmariya Wilson | VAS23CS056      |
+
+## Conclusion
+
+The Smart ISL Communication Assistant aims to make communication between ISL users and hearing individuals more accessible through sign recognition, English-to-ISL conversion, interactive learning, and emergency assistance.
+
+The project combines computer vision, deep learning, natural language processing, and speech technologies in a modular architecture. Its effectiveness will depend on the successful integration, training, and evaluation of the required models and supporting services.
