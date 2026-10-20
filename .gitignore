@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+
+# Environment & IDE
+.env
+.DS_Store
+.vscode/
+.idea/
+
+# ML Weights (Exclude large binaries, keep README)
+ml_model/weights/*.h5
+ml_model/weights/*.pth
+ml_model/weights/*.pt
+ml_model/weights/*.keras
+ml_model/weights/*.onnx
+!ml_model/weights/README.md
